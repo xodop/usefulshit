@@ -1,0 +1,68 @@
+#######################################################################
+sudo apt list --installed											#установленные пакеты
+
+
+статус процесса#############################################################
+sudo systemctl status
+
+переменные среды###########################################################
+vi ~/.bashrc																	#добавить путь в $PATH
+export PATH=/путь
+source ~/.bashrc
+
+
+ssh######################################################################
+ssh-keygen -b 4096													#генерация ключа ssh
+ssh-copy-id username@remote_host			#копировать публичный ключ на сервер
+					либо																в ~/.ssh/authorized_keys
+cat ~/.ssh/key.pub | ssh username@remote_host "mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys && chmod -R go= ~/.ssh && cat >> ~/.ssh/authorized_keys"
+/etc/ssh/sshd_config												#здесь хранится конфиг ssh
+
+sudo без пароля##############################################################
+в /etc/sudoers.d/ содаем файл с именем пользователя tech
+
+tech ALL=(ALL:ALL) NOPASSWD: ALL
+
+
+########################################################################									
+sudo add-apt-repository ppa:gns3/ppa		  #добавление ppa репозиториев
+
+
+netplan####################################################################
+sudo netplan generate
+sudo netplan apply
+
+
+dnsmasq###################################################################
+настройки в /etc/resolv.conf
+
+domain=mydomain.com												#название домена
+domain=fin.mydomain.com,192.168.1.0/24		#можно указать для подсети
+address=/extdomain.net/127.0.0.1							#на имя *.extdomain.net возвращается адрес 127.0.0.1 (запись типа А()
+cname=sambaserver,smb											#создает алиас smb для sambaserver
+no-hosts																					#отключает использование /etc/hosts (дефолтное поведение)
+nameserver 127.0.0.1													#для работы dnsmasque на том же сервере
+server=8.8.8.8																	#добавление апстрима
+server=/remoteoffice.org/192.168.3.10				#апстрим для определенных доменов
+server=/3.168.192.in-addr.arpa/192.168.3.10	#сервер для обработки обратной зоны
+service dnsmasq reload												#самая полезная команда
+
+
+span#######################################################################
+snap find <название>													#поиск снапа
+snap install <название>											#установка снапа
+snap list																					#список установленных снапов
+snap refresh <название>											#обновление снапа
+
+mariab#####################################################################
+mysql -u root -p																																		#подключение
+CREATE DATABASE name_bd;																										#создать бд
+CREATE USER 'user_name'@'localhost' IDENTIFIED BY 'password';							#создать юзера
+GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'localhost';						#назначить пользователю бд привелегии
+FLUSH PRIVILEGES;																																#обновить привелегии
+
+ftp#######################################################################
+vsftpd																						#ftp демон
+/etc/vsftpd.conf																	#конфиг тут
+/etc/vsftpd.userlist															#пользователи тут
+/home/ftpuser/																	#директория для фтпшника, пользователь ftpuser
