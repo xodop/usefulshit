@@ -17,6 +17,9 @@ ssh-copy-id username@remote_host			#копировать публичный кл
 					либо																в ~/.ssh/authorized_keys
 cat ~/.ssh/key.pub | ssh username@remote_host "mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys && chmod -R go= ~/.ssh && cat >> ~/.ssh/authorized_keys"
 /etc/ssh/sshd_config												#здесь хранится конфиг ssh
+sudo semanage port -a -t ssh_port_t -p tcp 2244			#сменить порт по-умолчанию в SELinux
+sudo yum -y install policycoreutils-python						#если не работает предыдущая комнда
+
 
 sudo без пароля##############################################################
 в /etc/sudoers.d/ содаем файл с именем пользователя tech
@@ -54,6 +57,7 @@ snap install <название>											#установка снапа
 snap list																					#список установленных снапов
 snap refresh <название>											#обновление снапа
 
+
 mariab#####################################################################
 mysql -u root -p																																		#подключение
 CREATE DATABASE name_bd;																										#создать бд
@@ -61,7 +65,8 @@ CREATE USER 'user_name'@'localhost' IDENTIFIED BY 'password';							#созда�
 GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'localhost';						#назначить пользователю бд привелегии
 FLUSH PRIVILEGES;																																#обновить привелегии
 
-ftp#######################################################################
+
+ftp########################################################################
 vsftpd																						#ftp демон
 /etc/vsftpd.conf																	#конфиг тут
 /etc/vsftpd.userlist															#пользователи тут
