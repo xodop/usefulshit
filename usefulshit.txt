@@ -7,7 +7,7 @@ sudo systemctl status
 
 переменные среды###########################################################
 vi ~/.bashrc																	#добавить путь в $PATH
-export PATH=/путь
+export PATH=$PATH:/путь
 source ~/.bashrc
 
 
@@ -59,11 +59,20 @@ snap refresh <название>											#обновление снапа
 
 
 mariab#####################################################################
+sudo mysql_secure_installation																									#базовая настройка безопасности
+
 mysql -u root -p																																		#подключение
-CREATE DATABASE name_bd;																										#создать бд
-CREATE USER 'user_name'@'localhost' IDENTIFIED BY 'password';							#создать юзера
-GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'localhost';						#назначить пользователю бд привелегии
-FLUSH PRIVILEGES;																																#обновить привелегии
+SHOW DATABASES;																																#показать все существующие базы
+SHOW CREATE DATABASE test;																										#показать конкретную базу с параметрами
+USE test																																						#выбрать базу
+SHOW tables;																																			#показать таблицы в выбранной базе
+select * from имя_таблицы;																											#показать содержимое таблицы
+show processlist;																																	#показать текущие процессы
+
+CREATE DATABASE name_bd;																																							#создать бд
+CREATE USER 'user_name'@'localhost' IDENTIFIED BY 'password';																				#создать юзера
+GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'host'  IDENTIFIED BY 'user_pass';						#назначить пользователю бд и привелегии
+FLUSH PRIVILEGES;																																													#обновить привелегии
 
 
 ftp########################################################################
@@ -71,3 +80,13 @@ vsftpd																						#ftp демон
 /etc/vsftpd.conf																	#конфиг тут
 /etc/vsftpd.userlist															#пользователи тут
 /home/ftpuser/																	#директория для фтпшника, пользователь ftpuser
+
+
+sudo dig +trace google.com																											#рекурсивный резолв адреса
+sudo yum-config-manager --enable ol7_addons																	#включение репозитория
+
+
+docker######################################################################
+/etc/docker/daemon.json																													#настройка сети для докера тут
+
+sudo docker system prune																															#очистка контейнеров, сетей и тд
