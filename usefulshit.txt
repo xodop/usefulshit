@@ -71,7 +71,7 @@ show processlist;																																	#показать текущи
 
 CREATE DATABASE name_bd;																																							#создать бд
 CREATE USER 'user_name'@'localhost' IDENTIFIED BY 'password';																				#создать юзера
-GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'host'  IDENTIFIED BY 'user_pass';						#назначить пользователю бд и привелегии
+GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'host'  IDENTIFIED BY 'password';						#назначить пользователю бд и привелегии
 FLUSH PRIVILEGES;																																													#обновить привелегии
 
 
@@ -88,5 +88,16 @@ sudo yum-config-manager --enable ol7_addons																	#включение 
 
 docker######################################################################
 /etc/docker/daemon.json																													#настройка сети для докера тут
+sudo docker system prune																												#очистка контейнеров, сетей и тд
+docker exec -ti название контейнера /bin/bash																#чтобы провалиться в контейнер
 
-sudo docker system prune																															#очистка контейнеров, сетей и тд
+iptables#####################################################################
+/etc/sysconfig/iptables																														#настройки iptables здесь
+
+
+sudo tcpdump -i any port 3306
+
+sysctl######################################################################
+sudo sysctl net.ipv4.ip_forward=1																								#включить роутинг
+
+enter ~.
