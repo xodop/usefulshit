@@ -6,19 +6,18 @@ sudo apt list --installed											#установленные пакеты
 sudo systemctl status
 
 переменные среды###########################################################
-vi ~/.bashrc																	#добавить путь в $PATH
+vi ~/.bashrc													#добавить путь в $PATH
 export PATH=$PATH:/путь
 source ~/.bashrc
 
 
 ssh######################################################################
-ssh-keygen -b 4096													#генерация ключа ssh
-ssh-copy-id username@remote_host			#копировать публичный ключ на сервер
-					либо																в ~/.ssh/authorized_keys
+ssh-keygen -b 4096												#генерация ключа ssh
+ssh-copy-id username@remote_host										#копировать публичный ключ на сервер
 cat ~/.ssh/key.pub | ssh username@remote_host "mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys && chmod -R go= ~/.ssh && cat >> ~/.ssh/authorized_keys"
 /etc/ssh/sshd_config												#здесь хранится конфиг ssh
-sudo semanage port -a -t ssh_port_t -p tcp 2244			#сменить порт по-умолчанию в SELinux
-sudo yum -y install policycoreutils-python						#если не работает предыдущая комнда
+sudo semanage port -a -t ssh_port_t -p tcp 2244									#сменить порт по-умолчанию в SELinux
+sudo yum -y install policycoreutils-python									#если не работает предыдущая комнда
 
 
 sudo без пароля##############################################################
@@ -41,63 +40,62 @@ dnsmasq###################################################################
 
 domain=mydomain.com												#название домена
 domain=fin.mydomain.com,192.168.1.0/24		#можно указать для подсети
-address=/extdomain.net/127.0.0.1							#на имя *.extdomain.net возвращается адрес 127.0.0.1 (запись типа А()
-cname=sambaserver,smb											#создает алиас smb для sambaserver
-no-hosts																					#отключает использование /etc/hosts (дефолтное поведение)
-nameserver 127.0.0.1													#для работы dnsmasque на том же сервере
-server=8.8.8.8																	#добавление апстрима
-server=/remoteoffice.org/192.168.3.10				#апстрим для определенных доменов
-server=/3.168.192.in-addr.arpa/192.168.3.10	#сервер для обработки обратной зоны
+address=/extdomain.net/127.0.0.1										#на имя *.extdomain.net возвращается
+														 адрес 127.0.0.1 (запись типа А()
+cname=sambaserver,smb												#создает алиас smb для sambaserver
+nameserver 127.0.0.1												#для работы dnsmasque на том же сервере
+server=8.8.8.8													#добавление апстрима
+server=/remoteoffice.org/192.168.3.10										#апстрим для определенных доменов
+server=/3.168.192.in-addr.arpa/192.168.3.10									#сервер для обработки обратной зоны
 service dnsmasq reload												#самая полезная команда
 
 
 span#######################################################################
-snap find <название>													#поиск снапа
-snap install <название>											#установка снапа
-snap list																					#список установленных снапов
-snap refresh <название>											#обновление снапа
+snap find <название>												#поиск снапа
+snap install <название>												#установка снапа
+snap list													#список установленных снапов
+snap refresh <название>												#обновление снапа
 
 
 mariab#####################################################################
-sudo mysql_secure_installation																									#базовая настройка безопасности
+sudo mysql_secure_installation											#базовая настройка безопасности
 
-mysql -u root -p																																		#подключение
-SHOW DATABASES;																																#показать все существующие базы
-SHOW CREATE DATABASE test;																										#показать конкретную базу с параметрами
-USE test																																						#выбрать базу
-SHOW tables;																																			#показать таблицы в выбранной базе
-select * from имя_таблицы;																											#показать содержимое таблицы
-show processlist;																																	#показать текущие процессы
+mysql -u root -p												#подключение
+SHOW DATABASES;													#показать все существующие базы
+SHOW CREATE DATABASE test;											#показать конкретную базу с параметрами
+USE test													#выбрать базу
+SHOW tables;													#показать таблицы в выбранной базе
+select * from имя_таблицы;											#показать содержимое таблицы
+show processlist;												#показать текущие процессы
 
-CREATE DATABASE name_bd;																																							#создать бд
-CREATE USER 'user_name'@'localhost' IDENTIFIED BY 'password';																				#создать юзера
-GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'host'  IDENTIFIED BY 'password';						#назначить пользователю бд и привелегии
-FLUSH PRIVILEGES;																																													#обновить привелегии
+CREATE DATABASE name_bd;											#создать бд
+CREATE USER 'user_name'@'localhost' IDENTIFIED BY 'password';							#создать юзера
+GRANT ALL PRIVILEGES ON name_bd.* TO 'user_name'@'host'  IDENTIFIED BY 'password';				#назначить пользователю бд и привелегии
+FLUSH PRIVILEGES;												#обновить привелегии
 
 
 ftp########################################################################
-vsftpd																						#ftp демон
-/etc/vsftpd.conf																	#конфиг тут
-/etc/vsftpd.userlist															#пользователи тут
-/home/ftpuser/																	#директория для фтпшника, пользователь ftpuser
+vsftpd														#ftp демон
+/etc/vsftpd.conf												#конфиг тут
+/etc/vsftpd.userlist												#пользователи тут
+/home/ftpuser/													#директория для фтпшника юзера ftpuser
 
 
-sudo dig +trace google.com																											#рекурсивный резолв адреса
-sudo yum-config-manager --enable ol7_addons																	#включение репозитория
+sudo dig +trace google.com											#рекурсивный резолв адреса
+sudo yum-config-manager --enable ol7_addons									#включение репозитория
 
 
 docker######################################################################
-/etc/docker/daemon.json																													#настройка сети для докера тут
-sudo docker system prune																												#очистка контейнеров, сетей и тд
-docker exec -ti название контейнера /bin/bash																#чтобы провалиться в контейнер
+/etc/docker/daemon.json												#настройка сети для докера тут
+sudo docker system prune											#очистка контейнеров, сетей и тд
+docker exec -ti название контейнера /bin/bash									#чтобы провалиться в контейнер
 
 iptables#####################################################################
-/etc/sysconfig/iptables																														#настройки iptables здесь
+/etc/sysconfig/iptables												#настройки iptables здесь
 
-
-sudo tcpdump -i any port 3306
 
 sysctl######################################################################
-sudo sysctl net.ipv4.ip_forward=1																								#включить роутинг
+sudo sysctl net.ipv4.ip_forward=1										#включить роутинг
 
+sudo tcpdump -i any port 3306
 enter ~.
