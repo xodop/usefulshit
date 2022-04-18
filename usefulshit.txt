@@ -39,7 +39,7 @@ dnsmasq###################################################################
 настройки в /etc/resolv.conf
 
 domain=mydomain.com												#название домена
-domain=fin.mydomain.com,192.168.1.0/24		#можно указать для подсети
+domain=fin.mydomain.com,192.168.1.0/24										#можно указать для подсети
 address=/extdomain.net/127.0.0.1										#на имя *.extdomain.net возвращается
 														 адрес 127.0.0.1 (запись типа А()
 cname=sambaserver,smb												#создает алиас smb для sambaserver
@@ -89,7 +89,7 @@ docker######################################################################
 /etc/docker/daemon.json												#настройка сети для докера тут
 sudo docker system prune											#очистка контейнеров, сетей и тд
 docker exec -ti название контейнера /bin/bash									#чтобы провалиться в контейнер
-docker network ls										#список сетевых интерфейсов докера
+docker network ls												#список сетевых интерфейсов докера
 
 iptables#####################################################################
 /etc/sysconfig/iptables												#настройки iptables здесь
