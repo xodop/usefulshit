@@ -1,12 +1,12 @@
 #######################################################################
 sudo apt list --installed											#установленные пакеты
 
-/etc/init.d/bgpd restart										#рестарт процесса через init
+/etc/init.d/bgpd restart											#рестарт процесса через init
 
 systemctl#############################################################
-sudo systemctl status										#статус юнита
+sudo systemctl status												#статус юнита
 
-/etc/systemd/system/*.service								#файл кастомного юнита
+/etc/systemd/system/*.service											#файл кастомного юнита
 
 
 переменные среды###########################################################
@@ -88,22 +88,22 @@ vsftpd														#ftp демон
 /home/ftpuser/													#директория для фтпшника юзера ftpuser
 
 
-sudo dig +trace google.com											#рекурсивный резолв адреса
-sudo yum-config-manager --enable ol7_addons									#включение репозитория
+sudo dig +trace google.com										#рекурсивный резолв адреса
+sudo yum-config-manager --enable ol7_addons								#включение репозитория
 
 
 docker######################################################################
-/etc/docker/daemon.json												#настройка сети для докера тут
-sudo docker system prune											#очистка контейнеров, сетей и тд
-docker exec -ti название контейнера /bin/bash									#чтобы провалиться в контейнер
-docker network ls										#список сетевых интерфейсов докера
+/etc/docker/daemon.json											#настройка сети для докера тут
+sudo docker system prune										#очистка контейнеров, сетей и тд
+docker exec -ti название контейнера /bin/bash								#чтобы провалиться в контейнер
+docker network ls											#список сетевых интерфейсов докера
 
 iptables#####################################################################
-/etc/sysconfig/iptables												#настройки iptables здесь
+/etc/sysconfig/iptables											#настройки iptables здесь
 
 
 sysctl######################################################################
-sudo sysctl net.ipv4.ip_forward=1										#включить роутинг
+sudo sysctl net.ipv4.ip_forward=1									#включить роутинг
 
 sudo tcpdump -i any port 3306
 enter ~.
@@ -112,9 +112,9 @@ enter ~.
 yum install kernel-devel kernel-headers gcc make dkms perl bzip2
 
 дисковое пространство
-df –h												#занятое дисковое пространство
-sudo du --max-depth=1 -h /								#пространство занимаемое папками в каталоге
-du -ah												#показывает все содержимое
+df –h													#занятое дисковое пространство
+sudo du --max-depth=1 -h /										#пространство занимаемое папками в каталоге
+du -ah													#показывает все содержимое
 
 
 роутинговое говно##############################################################
