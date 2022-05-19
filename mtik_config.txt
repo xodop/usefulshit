@@ -1,0 +1,52 @@
+/interface bridge																																#бридж отвечает за коммутацию интерфейсов
+add name=loopback0 comment="Loopback MGMT" 
+add name=bridge222
+
+/interface ethernet																															#физические интерфесы
+
+
+/interface vlan																																	#влан тэги добавлять сюда
+add interface=ether2 name=ether2.222 vlan-id=222 comment=MGMT 
+
+/ip address																																			#ип
+add address=2.2.2.2/32 interface=loopback0
+
+/interface bridge port																														#сюда добавлять порты с тэгом и без
+add bridge=bridge222 interface=ether2.222
+
+
+/routing ospf area
+add area-id=0.0.0.1 default-cost=1 inject-summary-lsas=yes name=area1 type=stub
+
+/routing ospf instance
+set [ find default=yes ] out-filter=RF_OSPF_OUT redistribute-bgp=as-type-2 router-id=10.25.0.7
+
+/routing ospf network
+add area=backbone comment=by_ansible network=10.0.10.116/30
+add area=area1 network=10.125.250.0/24
+
+
+
+/routing bgp instance
+set default as=65025 client-to-client-reflection=no redistribute-connected=yes redistribute-ospf=yes router-id=10.25.0.7
+/routing bgp peer
+add in-filter=RF_IBGP_R1R2_IMP name=R2 nexthop-choice=force-self out-filter=RF_IBGP_R1R2_EXP remote-address=10.25.0.8 remote-as=65025 ttl=1 update-source=loopback0 use-bfd=yes
+
+
+/interface gre
+add !keepalive local-address=95.154.107.219 mtu=1400 name=tun3 remote-address=80.92.160.250
+
+/ip ipsec identity
+add peer=lp2_Al secret=Engiepeethoongi1Lei0Eexai4eeGe
+/ip ipsec policy
+add dst-address=80.92.160.250/32 peer=lp1_Al protocol=gre src-address=95.154.107.219/32
+
+
+ /put [resolve ya.ru server  80.92.163.139]		#резолв имени с сервера
+
+
+
+Дефолтные области видимости и области поиска
+C: Scope - 10, Target Scope не имеет смысла, так как данный маршрут указывает на интерфейс выхода
+D: Scope - 20, Target Scope - 10
+S: Scope - 30, Target Scope - 10

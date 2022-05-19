@@ -1,0 +1,171 @@
+VXLAN EVPN
+
+VTEP (Virtual Tunnel Endpoint) аналог PE
+
+
+VLAN разделяет широковещательные домены
+
+
+VNI (VxLAN Network Identifier)=EVI(EVPN instance)
+MAC-VRF	виртуальная таблица маршрутизации мак-адресов в EVPN
+
+ESI (ethernet segment identifier)
+10 байтовое число, первый окте указывает на формат ESI
+доступно 6 типов ESI
+	Type 0 (T=0x00)	произвольные 9 байт, прописанные вручную
+	Type 1 (T=0x01)	когда включен IEEE 802.1AX LACP между PE и CE, генерится автоматически из CE LACP System MAC (6 байт) + CE LACP Port Key (2 байта) + 0x00
+	Type 2 (T=0x02)	когда хосты косвенно поключены через бридж CE-PE, генерится автоматически из Root Bridge MAC address (6 байт) + Root Bridge Priority (2 octets) + 0x00
+	Type 3 (T=0x03)	MAC-based ESI, генерится автоматически или вручную из PE MAC address (6 байт) + Local Discriminator value (3 байта)
+	Type 4 (T=0x04)	router-ID ESI, генерится автоматически или вручную из Router ID (4 байта) + Local Discriminator value (4 байта) + 0x00
+	Type 5 (T=0x05)	AS-based ESI, генерится автоматически или вручную из ASN (4 байта или 0x0000 + 2 байта) + Local Discriminator value (4 байта) + 0x00
+	
+unique ESI to enable auto-discovery of Ethernet segments and Designated Forwarder (DF) election
+ESI 0 denotes a single-homed site
+DF отвечает за передачу трафика из EVPN домена к CE
+DF выбирается по формуле i = VID mod N, где N - число всех PE, поключенных к данному ES
+
+NVE (Network Virtual Edge) = виртуальный интерфейс EVPN туннеля
+
+
+Ethernet Tag ID identifies a particular broadcast domain (e.g., a VLAN) in an EVPN instance
+   поле размером 32 бита, может содерать 12 битный VLAN ID или 24 битный идентификатор
+
+VLAN-based one-to-one mapping	Ethernet Tag ID=0 одна таблица MAC-VRF на один влан, одна таблица MAC-VRF на один EVI
+VLAN-aware  selective bundling	одна таблица MAC-VRF на каждый влан, все таблицы в одном EVI
+VLAN-bundle all-to-one bundling Ethernet Tag ID=0 одна таблица на MAC-VRF на все вланы
+
+
+EVPN instance requires a Route Distinguisher (RD) that is unique per MAC-VRF and one or more globally unique Route Targets (RTs)
+
+  
+Типы машрутов EVPN BGP
+1 - Ethernet Auto-Discovery (A-D) route
+      
+                +---------------------------------------+
+                |  Route Distinguisher (RD) (8 байт)  | <--- атрибут
+                +---------------------------------------+
+                |Ethernet Segment Identifier (10 байт)|
+                +---------------------------------------+
+                |  Ethernet Tag ID (4 байта)           |
+                +---------------------------------------+
+                |  MPLS Label/VXLAN ID (3 байта) | <--- атрибут
+                +---------------------------------------+
+
+	Sections 8.2 ("Fast Convergence") and 8.4 ("Aliasing and Backup Path")
+
+2 - MAC/IP Advertisement route
+      
+                +---------------------------------------+
+                |  RD (8 байт)                        | <--- атрибут
+                +---------------------------------------+
+                |Ethernet Segment Identifier (10 байт)| <--- атрибут
+                +---------------------------------------+
+                |  Ethernet Tag ID (4 байта)           |
+                +---------------------------------------+
+                |  MAC Address Length (1 байт) | <--- указывает на длину в битах
+                +---------------------------------------+
+                |  MAC Address (6 байт)               |
+                +---------------------------------------+
+                |  IP Address Length (1 байт)          | <--- указывает на длину в битах
+                +---------------------------------------+
+                |  IP Address (0, 4, or 16 байт)      |
+                +---------------------------------------+
+                |  MPLS Label1/VXLAN ID  (3 байта) | <--- атрибут
+                +---------------------------------------+
+                |  MPLS Label2/VXLAN ID  (0 or 3 байта) | <--- атрибут
+                +---------------------------------------+
+	
+	Sections 9 ("Determining Reachability to Unicast MAC Addresses") and 14 ("Load Balancing of Unicast Packets")
+	
+3 - Inclusive Multicast Ethernet Tag route
+	
+               +---------------------------------------+
+               |  RD (8 байт)                        | <--- атрибут
+               +---------------------------------------+
+               |  Ethernet Tag ID (4 байта)           |
+               +---------------------------------------+
+               |  IP Address Length (1 байт)          | <--- указывает на длину в битах
+               +---------------------------------------+
+               |  Originating Router's IP Address      |
+               |          (4 or 16 байт)             |
+               +---------------------------------------+
+	
+	Sections 11 ("Handling of Multi-destination Traffic"), 12 ("Processing of Unknown Unicast Packets"), and 16 ("Multicast and Broadcast")
+	
+4 - Ethernet Segment route
+	
+               +---------------------------------------+
+               |  RD (8 octets)                        | <--- атрибут
+               +---------------------------------------+
+               |Ethernet Segment Identifier (10 octets)|
+               +---------------------------------------+
+               |  IP Address Length (1 octet)          | <--- указывает на длину в битах
+               +---------------------------------------+
+               |  Originating Router's IP Address      |
+               |          (4 or 16 octets)             |
+               +---------------------------------------+
+	       
+	Section 8.5 ("Designated Forwarder Election")
+
+
+EVPN extended Community
+
+1 - ESI Label Extended Community
+
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    | Type=0x06     | Sub-Type=0x01 | Flags(1 octet)|  Reserved=0   |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |  Reserved=0   |          ESI Label                            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	
+	используется для расщипления горизонта в случае мультихоуминга
+	на основании этих маршрутов PE, включенные в один ES, фильтруют маршруты, пришедшие из этого ES
+	может быть анонсировано вместе с маршрутом типа 1
+	Section 8.3 ("Split Horizon")
+
+2 - ES-Import Route Target
+
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    | Type=0x06     | Sub-Type=0x02 |          ES-Import            |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                     ES-Import Cont'd                          |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+	разрешает импорт маршрутов из ES на всех PE, присоединенных к этому ES
+	переносится вместе с маршрутами типа 4
+	для других маршрутов значение определяется автоматически путем кодирования 6 старших байт ESI, соответствующих мак адресу в ES-Import Route Target
+	Section 8.1 ("Multihomed Ethernet Segment Auto-discovery")
+
+3 - MAC Mobility Extended Community
+	
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    | Type=0x06     | Sub-Type=0x00 |Flags(1 байт)|  Reserved=0    |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                       Sequence Number                         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    
+	младший бит флага липкий, если он имеет значение 1, то мак статический
+	Sequence Number нужен, чтобы PE сохраняли корректные маршруты при получении большого количества апдейтов для одного и того же мака адреса
+	может анонсироваться вместе с маршрутами типа 2	
+	Section 15 ("MAC Mobility")
+	
+4 - Default Gateway Extended Communityъ
+	
+	Type=0x03    | Sub-Type=0x0d (Default Gateway)
+	Section 10.1 ("Default Gateway")
+
+5 - Route Distinguisher Assignment per MAC-VRF
+6 - Route Targets
+
+
+
+
+
+
+
+
+
+

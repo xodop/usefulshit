@@ -1,0 +1,34 @@
+conf sync													синхронная настройка vpc нексусов/екстендеров
+
+show vpc role											роль vpc пира на nx
+show vpc brief										
+
+cli alias name shruncfg show running-config
+
+Для корректной работы на vPC пирах должны совпадать Type-1 параметры:
+- STP протокол (PVST, Rapid-PVST, MSTP)
+- BPDU Filter, BPDU Guard, Loop Guard
+- Настройки MST региона
+- Режим LACP, скорость и дуплекс на портах
+
+show vpc consistency-parameters			для проверки этих параметров
+
+
+show fabric forwarding ip local-host-db	локальная база форвардинга
+show bgp l2vpn evpn									маршруты evpn
+show l2route evpn mac-ip							таблица соответствия мак-ip
+
+
+
+interface port-channel197
+  lacp mode delay										включает lacp delay (нужно для бута бездисковых серверов)
+  vpc 197
+interface Ethernet1/15
+  lacp port-priority 4096								делает порт приоритетным/основным
+  channel-group 197 mode active 
+
+
+neighbor 199.1.1.1 allowas-in 1					позволяет маршруту возвращаться в local as 1 раз
+
+show ip bgp neighbors  80.92.164.2 advertised-routes		анонсируемые маршруты bgp
+show ip bgp neighbors  80.92.164.2 routes						 принимаемые маршруты bgp
