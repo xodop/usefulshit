@@ -100,7 +100,7 @@ docker network ls											#список сетевых интерфейсов 
 
 iptables#####################################################################
 /etc/sysconfig/iptables											#настройки iptables здесь
-
+sudo iptables-restore /etc/sysconfig/iptables						#перечитать конфиг
 
 sysctl######################################################################
 sudo sysctl net.ipv4.ip_forward=1									#включить роутинг
