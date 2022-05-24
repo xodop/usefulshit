@@ -32,3 +32,8 @@ neighbor 199.1.1.1 allowas-in 1					позволяет маршруту возв
 
 show ip bgp neighbors  80.92.164.2 advertised-routes		анонсируемые маршруты bgp
 show ip bgp neighbors  80.92.164.2 routes						 принимаемые маршруты bgp
+
+
+В команде local-as есть атрибуты no-prepend и replace-as. 
+No-prepend позволят не добавлять в AS-Path номер фиктивной АС — только настоящей. 
+Опция replace-as позволит заменить её на фиктивную.

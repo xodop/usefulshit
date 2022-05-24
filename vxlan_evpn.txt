@@ -17,7 +17,7 @@ ESI (ethernet segment identifier)
 	Type 2 (T=0x02)	когда хосты косвенно поключены через бридж CE-PE, генерится автоматически из Root Bridge MAC address (6 байт) + Root Bridge Priority (2 octets) + 0x00
 	Type 3 (T=0x03)	MAC-based ESI, генерится автоматически или вручную из PE MAC address (6 байт) + Local Discriminator value (3 байта)
 	Type 4 (T=0x04)	router-ID ESI, генерится автоматически или вручную из Router ID (4 байта) + Local Discriminator value (4 байта) + 0x00
-	Type 5 (T=0x05)	AS-based ESI, генерится автоматически или вручную из ASN (4 байта или 0x0000 + 2 байта) + Local Discriminator value (4 байта) + 0x00
+	Type 5 (T=0x05)	AS-b ased ESI, генерится автоматически или вручную из ASN (4 байта или 0x0000 + 2 байта) + Local Discriminator value (4 байта) + 0x00
 	
 unique ESI to enable auto-discovery of Ethernet segments and Designated Forwarder (DF) election
 ESI 0 denotes a single-homed site
@@ -95,18 +95,35 @@ EVPN instance requires a Route Distinguisher (RD) that is unique per MAC-VRF and
 4 - Ethernet Segment route
 	
                +---------------------------------------+
-               |  RD (8 octets)                        | <--- атрибут
+               |  RD (8 байт)                        | <--- атрибут
                +---------------------------------------+
-               |Ethernet Segment Identifier (10 octets)|
+               |Ethernet Segment Identifier (10 байт)|
                +---------------------------------------+
-               |  IP Address Length (1 octet)          | <--- указывает на длину в битах
+               |  IP Address Length (1 байт)          | <--- указывает на длину в битах
                +---------------------------------------+
                |  Originating Router's IP Address      |
-               |          (4 or 16 octets)             |
+               |          (4 or 16 байт)             |
                +---------------------------------------+
 	       
 	Section 8.5 ("Designated Forwarder Election")
 
+5 - IP Prefix Route Encoding
+
+       +---------------------------------------+
+       |      RD (8 байт)                |
+       +---------------------------------------+
+       |Ethernet Segment Identifier (10 байт) |
+       +---------------------------------------+
+       |  Ethernet Tag ID (4 байт)       |
+       +---------------------------------------+
+       |  IP Prefix Length (1 байт, 0 to 32)  |
+       +---------------------------------------+
+       |  IP Prefix (4 байт)                 |
+       +---------------------------------------+
+       |  GW IP Address (4 байт)             |
+       +---------------------------------------+
+       |  MPLS Label/VXLAN ID (3 байт)  |
+       +---------------------------------------+
 
 EVPN extended Community
 
@@ -114,7 +131,7 @@ EVPN extended Community
 
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    | Type=0x06     | Sub-Type=0x01 | Flags(1 octet)|  Reserved=0   |
+    | Type=0x06     | Sub-Type=0x01 | Flags(1 байт)|  Reserved=0   |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |  Reserved=0   |          ESI Label                            |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
