@@ -40,3 +40,6 @@ No-prepend позволят не добавлять в AS-Path номер фик
 Опция replace-as позволит заменить её на фиктивную.
 
 show processes cpu history						загрузка проца
+
+
+loader > boot nxos.7.0.3.I7.bin

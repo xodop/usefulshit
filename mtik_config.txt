@@ -33,13 +33,15 @@ set default as=65025 client-to-client-reflection=no redistribute-connected=yes r
 add in-filter=RF_IBGP_R1R2_IMP name=R2 nexthop-choice=force-self out-filter=RF_IBGP_R1R2_EXP remote-address=10.25.0.8 remote-as=65025 ttl=1 update-source=loopback0 use-bfd=yes
 
 
+
 /interface gre
 add !keepalive local-address=95.154.107.219 mtu=1400 name=tun3 remote-address=80.92.160.250
 
 /ip ipsec identity
-add peer=lp2_Al secret=Engiepeethoongi1Lei0Eexai4eeGe
+add peer=lp2_Al secret=Engiepfssfsexai4esdfsefGe
 /ip ipsec policy
 add dst-address=80.92.160.250/32 peer=lp1_Al protocol=gre src-address=95.154.107.219/32
+
 
 
  /put [resolve ya.ru server  80.92.163.139]		#резолв имени с сервера
@@ -50,3 +52,6 @@ add dst-address=80.92.160.250/32 peer=lp1_Al protocol=gre src-address=95.154.107
 C: Scope - 10, Target Scope не имеет смысла, так как данный маршрут указывает на интерфейс выхода
 D: Scope - 20, Target Scope - 10
 S: Scope - 30, Target Scope - 10
+
+
+:for i from=0 to=22 do={/ip ipsec policy set $i protocol=gre} 				#делает ренж
