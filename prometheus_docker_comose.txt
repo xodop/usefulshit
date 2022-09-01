@@ -1,27 +1,34 @@
-version: "3.1"
+version: "3.9"
 
 networks:
   monitoring:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.201.111.0/24
+          gateway: 10.201.111.1
 
-volume:
+volumes:
   prometheus_data: {}
-
 
 services:
 
   prometheus:
+    user: root
     image: prom/prometheus
     container_name: prometheus
     ports:
       - 80:9090
     restart: unless-stopped
-    volume:
-      - /home/vita/prometheus:/etc/prometheuso
-      - /home/vita/prometheus_data:/prometheus
+    volumes:
+      - /home/vita/prometheus/prometheus:/etc/prometheus
+      - /home/vita/prometheus/prometheus_data:/prometheus
+      - /home/vita/prometheus/queries.active:/prometheus/data/queries.active
     command:
-      - '--web.comsole.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/pro,etheus/consoles'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
     networks:
       - monitoring
@@ -36,3 +43,47 @@ services:
       - 9116
     networks:
       - monitoring
+
+
+RUN  useradd -s /bin/bash -G sudo -u 777 vita && chown -R vita:vita /etc/prometheus /prometheus
+
+label_values(name)
+label_values({name=~"$host", ifDescr=~"$if"}, ifAlias)
+
+
+Хранилище
+
+Поступающие сэмплы группируются в блоки по 2 часа. 
+Каждый такой блок состоит из директории, содержащей:
+    * поддиректории chunks, в которых содержатся все все времянные ряды за это время;
+    * файл метаданных;
+    * файл-индексатор.
+Сэмплы группируются вместе в один или несколько сегментных файлов размером до 512 МБ.
+Когда ряд удаляется, удаленные записи сохраняются некоторое время в отдельном файле tombstone.
+
+
+Текущий блок сэмплов находится в ОЗУ. 
+От крэшей его защищает write-ahead log (WAL), который может быть воспроизведен повторно после рестарта сервера. 
+WAL хранится в директории wal в виде сегментов размером до 128 МБ, которые содержат сырые некомпрессированные данные. Минимум таких сегментов 3.
+
+
+    
+    
+Скрипты
+
+Переменные:
+$varname                            переменная
+${var_name}                      переменная которую можно вставить в середину выражения??
+${var_name:<format>}    супер переменная??
+  
+Query                    генерирует список значений на основании метрик
+Custom                 значения определяются вручную через запятую
+Text box                пустое текстовое поле с возможным дефолтным значением????????
+Constant               скрытая константа
+Data source          для быстрой смены источника для всего дэшборда
+Interval                 переменная для временных интервалов
+Ad hoc filters        глобальная переменная для всех запросов от определенного источника (only work with Prometheus, Loki, InfluxDB, and Elasticsearch)????
+Global variables        встроенные переменные
+Chained variables      ссылки в переменных на переменные
+        
+    

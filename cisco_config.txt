@@ -18,7 +18,7 @@ show fabric forwarding ip local-host-db	локальная база форвар
 show bgp l2vpn evpn									маршруты evpn
 show l2route evpn mac-ip							таблица соответствия мак-ip
 
-
+show  port-channel summary					статус портов бандле
 
 interface port-channel197
   lacp mode delay										включает lacp delay (нужно для бута бездисковых серверов)
@@ -43,3 +43,6 @@ show processes cpu history						загрузка проца
 
 
 loader > boot nxos.7.0.3.I7.bin
+
+
+buffer-delete	отчистить буфер свитч профиля

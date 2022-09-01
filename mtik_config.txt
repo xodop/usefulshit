@@ -1,50 +1,4 @@
-/interface bridge																																#бридж отвечает за коммутацию интерфейсов
-add name=loopback0 comment="Loopback MGMT" 
-add name=bridge222
-
-/interface ethernet																															#физические интерфесы
-
-
-/interface vlan																																	#влан тэги добавлять сюда
-add interface=ether2 name=ether2.222 vlan-id=222 comment=MGMT 
-
-/ip address																																			#ип
-add address=2.2.2.2/32 interface=loopback0
-
-/interface bridge port																														#сюда добавлять порты с тэгом и без
-add bridge=bridge222 interface=ether2.222
-
-
-/routing ospf area
-add area-id=0.0.0.1 default-cost=1 inject-summary-lsas=yes name=area1 type=stub
-
-/routing ospf instance
-set [ find default=yes ] out-filter=RF_OSPF_OUT redistribute-bgp=as-type-2 router-id=10.25.0.7
-
-/routing ospf network
-add area=backbone comment=by_ansible network=10.0.10.116/30
-add area=area1 network=10.125.250.0/24
-
-
-
-/routing bgp instance
-set default as=65025 client-to-client-reflection=no redistribute-connected=yes redistribute-ospf=yes router-id=10.25.0.7
-/routing bgp peer
-add in-filter=RF_IBGP_R1R2_IMP name=R2 nexthop-choice=force-self out-filter=RF_IBGP_R1R2_EXP remote-address=10.25.0.8 remote-as=65025 ttl=1 update-source=loopback0 use-bfd=yes
-
-
-
-/interface gre
-add !keepalive local-address=95.154.107.219 mtu=1400 name=tun3 remote-address=80.92.160.250
-
-/ip ipsec identity
-add peer=lp2_Al secret=Engiepfssfsexai4esdfsefGe
-/ip ipsec policy
-add dst-address=80.92.160.250/32 peer=lp1_Al protocol=gre src-address=95.154.107.219/32
-
-
-
- /put [resolve ya.ru server  80.92.163.139]		#резолв имени с сервера
+/put [resolve ya.ru server  80.92.163.139]		#резолв имени с сервера
 
 
 
@@ -55,3 +9,68 @@ S: Scope - 30, Target Scope - 10
 
 
 :for i from=0 to=22 do={/ip ipsec policy set $i protocol=gre} 				#делает ренж
+
+
+
+
+
+
+
+
+/ip firewall address-list
+	add address=10.0.0.0/8 list=private_nets
+	add address=172.16.0.0/12 list=private_nets
+	add address=192.168.0.0/16 list=private_nets
+	add address=80.92.163.5 list=ipsec
+	add address=80.92.163.6 list=ipsec
+	add address=80.92.164.5 list=ipsec
+	add address=80.92.164.7 list=ipsec
+	
+    
+/ip firewall filter
+	add action=accept chain=input comment="icmp echo reply" icmp-options=8:0-255 protocol=icmp
+	add action=accept chain=input dst-port=22 protocol=tcp src-address=80.92.160.0/20
+	add action=accept chain=input comment="Zabbix SNMP" dst-port=161 protocol=udp src-address=80.92.162.11
+	add action=accept chain=input comment="Accept all from TUN" in-interface-list=TUN
+	add action=accept chain=input comment="Accept all from LAN" in-interface-list=LAN
+	add action=accept chain=input connection-state=established,related,untracked
+	add action=drop chain=input
+	
+	add action=accept chain=forward src-address-list=private_nets
+	add action=accept chain=forward dst-address-list=private_nets
+    add action=accept chain=forward in-interface-list=GUEST out-interface-list=WAN
+    add action=accept chain=forward connection-state=established,related,untracked
+	add action=drop chain=forward
+
+
+/ip firewall nat
+    add action=masquerade chain=srcnat comment="Masquerade to WAN" ipsec-policy=out,none out-interface-list=WAN
+
+
+
+
+
+/ip route
+add distance=1 dst-address=208.67.222.222/32 gateway=5.130.30.1 comment="Recrusive route" scope 10
+add comment="--ispswitch script--" distance=1 gateway=5.130.30.1 routing-mark=WAN-RM-ether1
+add comment="--ispswitch script--" distance=1 gateway=109.202.24.1 routing-mark=WAN-RM-ether2
+add check-gateway=ping comment="Recursive route" distance=1 gateway=208.67.222.222
+add check-gateway=ping distance=1 gateway=5.130.30.1 
+add check-gateway=ping distance=2 gateway=109.202.24.1
+
+/ip route rule
+add comment="--ispswitch script--" src-address=5.130.30.1/32 table=WAN-RM-ether1
+add comment="--ispswitch script--" src-address=109.202.24.1/32 table=WAN-RM-ether2
+	
+/ip firewall mangle
+add action=mark-connection chain=input comment="--ispswitch script-- ether1 step-1" in-interface=ether1 new-connection-mark=WAN-CON-ether1
+add action=mark-connection chain=input comment="--ispswitch script-- ether2 step-1" in-interface=ether2 new-connection-mark=WAN-CON-ether2
+add action=mark-routing chain=output comment="--ispswitch script-- ether1 step-2" connection-mark=WAN-CON-ether1 new-routing-mark=WAN-RM-ether1
+add action=mark-routing chain=output comment="--ispswitch script-- ether2 step-2" connection-mark=WAN-CON-ether2 new-routing-mark=WAN-RM-ether2
+add action=accept chain=prerouting comment="--ispswitch script-- ether1 step-3" dst-address=5.130.30.0/24 in-interface-list=LAN
+add action=accept chain=prerouting comment="--ispswitch script-- ether2 step-3" dst-address=109.202.24.0/25 in-interface-list=LAN
+add action=jump chain=prerouting comment="--ispswitch script--" connection-state=new dst-address-list=!private_nets in-interface-list=LAN jump-target=pcc
+add action=mark-routing chain=prerouting comment="--ispswitch script-- ether1 step-5" connection-mark=WAN-CON-ether1 in-interface-list=LAN new-routing-mark=WAN-RM-ether1
+add action=mark-routing chain=prerouting comment="--ispswitch script-- ether2 step-5" connection-mark=WAN-CON-ether2 in-interface-list=LAN new-routing-mark=WAN-RM-ether2
+add action=mark-connection chain=pcc comment="--ispswitch script-- PCC-3 step-4" new-connection-mark=WAN-CON-ether1 passthrough=yes per-connection-classifier=both-addresses-and-ports:2/0
+add action=mark-connection chain=pcc comment="--ispswitch script-- PCC-3 step-4" new-connection-mark=WAN-CON-ether2 passthrough=yes per-connection-classifier=both-addresses-and-ports:2/1
