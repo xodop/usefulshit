@@ -163,3 +163,6 @@ set tabstop=4
 set shiftwidth=4
 set smarttab
 set expandtab
+
+стресс тесты##############################################################
+sudo stress-ng --cpu 1 --metrics --timeout 300                          

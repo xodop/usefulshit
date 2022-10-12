@@ -44,5 +44,6 @@ show processes cpu history						загрузка проца
 
 loader > boot nxos.7.0.3.I7.bin
 
+boot config-file flash:/config.text				указать конфи с которого грузиться
 
 buffer-delete	отчистить буфер свитч профиля
