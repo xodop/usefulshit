@@ -15,7 +15,6 @@ volumes:
 services:
 
   prometheus:
-    user: root
     image: prom/prometheus
     container_name: prometheus
     ports:
@@ -45,12 +44,6 @@ services:
       - monitoring
 
 
-RUN  useradd -s /bin/bash -G sudo -u 777 vita && chown -R vita:vita /etc/prometheus /prometheus
-
-label_values(name)
-label_values({name=~"$host", ifDescr=~"$if"}, ifAlias)
-
-
 Хранилище
 
 Поступающие сэмплы группируются в блоки по 2 часа. 
@@ -67,8 +60,7 @@ label_values({name=~"$host", ifDescr=~"$if"}, ifAlias)
 WAL хранится в директории wal в виде сегментов размером до 128 МБ, которые содержат сырые некомпрессированные данные. Минимум таких сегментов 3.
 
 
-    
-    
+
 Скрипты
 
 Переменные:
@@ -85,5 +77,38 @@ Interval                 переменная для временных инте
 Ad hoc filters        глобальная переменная для всех запросов от определенного источника (only work with Prometheus, Loki, InfluxDB, and Elasticsearch)????
 Global variables        встроенные переменные
 Chained variables      ссылки в переменных на переменные
-        
-    
+
+Пример:        
+label_values(name)
+label_values({name=~"$host", ifDescr=~"$if"}, ifAlias)
+
+
+
+Алерты
+
+{{ define "alert" }}
+{{ if eq (.Status) "firing" }}{{if  .Labels.ifDescr }} ⚠️ {{ .Labels.alertname }} on {{ .Labels.ifDescr }} 
+{{else}} ⚠️ {{ .Labels.alertname }} {{end}}
+WHEN: {{ .StartsAt.Format "02.01.2006 15:04:05"  }} {{ .StartsAt.Location }}{{else }} 
+{{if  .Labels.ifDescr }} ✅ {{ .Labels.alertname }} on {{ .Labels.ifDescr }}{{else}} ✅ {{ .Labels.alertname }} {{end}}
+WHEN: {{ .EndsAt.Format "02.01.2006 15:04:05"  }} {{ .EndsAt.Location }} {{end}}{{ if gt (len .Annotations) 0 }}
+ANNOTATION: {{ range .Annotations.SortedPairs }}
+        {{ .Name }}: {{ .Value }}{{ end }}{{ end }}
+LABELS: {{ range .Labels.SortedPairs }}
+        {{ .Name }}: {{ .Value }}{{ end }}
+{{ if gt (len .DashboardURL ) 0 }}GO TO DASHBOARD: {{ .DashboardURL }}{{ end }}
+{{ end }}
+
+
+
+{{ define "message" }}
+{{ if gt (len .Alerts.Firing) 0 }}{{ len .Alerts.Firing }}  FIRING:
+    {{ range .Alerts.Firing }} {{ template "alert" .}}{{ end }}{{end}}
+{{ if gt (len .Alerts.Resolved) 0 }}
+{{ len .Alerts.Resolved }} RESOLVED:
+    {{ range .Alerts.Resolved }} {{ template "alert" .}} {{ end }}
+{{ end }}{{ end }}
+
+
+
+{{ template "message" . }}

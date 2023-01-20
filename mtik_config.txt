@@ -1,5 +1,6 @@
 /put [resolve ya.ru server  80.92.163.139]		#резолв имени с сервера
 
+ /ip firewall connection remove [find where  dst-address~""] #отчистить установленные соединения 
 
 
 Дефолтные области видимости и области поиска
@@ -49,28 +50,25 @@ S: Scope - 30, Target Scope - 10
 
 
 
-
-/ip route
-add distance=1 dst-address=208.67.222.222/32 gateway=5.130.30.1 comment="Recrusive route" scope 10
-add comment="--ispswitch script--" distance=1 gateway=5.130.30.1 routing-mark=WAN-RM-ether1
-add comment="--ispswitch script--" distance=1 gateway=109.202.24.1 routing-mark=WAN-RM-ether2
-add check-gateway=ping comment="Recursive route" distance=1 gateway=208.67.222.222
-add check-gateway=ping distance=1 gateway=5.130.30.1 
-add check-gateway=ping distance=2 gateway=109.202.24.1
-
-/ip route rule
-add comment="--ispswitch script--" src-address=5.130.30.1/32 table=WAN-RM-ether1
-add comment="--ispswitch script--" src-address=109.202.24.1/32 table=WAN-RM-ether2
-	
 /ip firewall mangle
 add action=mark-connection chain=input comment="--ispswitch script-- ether1 step-1" in-interface=ether1 new-connection-mark=WAN-CON-ether1
 add action=mark-connection chain=input comment="--ispswitch script-- ether2 step-1" in-interface=ether2 new-connection-mark=WAN-CON-ether2
 add action=mark-routing chain=output comment="--ispswitch script-- ether1 step-2" connection-mark=WAN-CON-ether1 new-routing-mark=WAN-RM-ether1
 add action=mark-routing chain=output comment="--ispswitch script-- ether2 step-2" connection-mark=WAN-CON-ether2 new-routing-mark=WAN-RM-ether2
-add action=accept chain=prerouting comment="--ispswitch script-- ether1 step-3" dst-address=5.130.30.0/24 in-interface-list=LAN
-add action=accept chain=prerouting comment="--ispswitch script-- ether2 step-3" dst-address=109.202.24.0/25 in-interface-list=LAN
-add action=jump chain=prerouting comment="--ispswitch script--" connection-state=new dst-address-list=!private_nets in-interface-list=LAN jump-target=pcc
+add action=accept chain=prerouting comment="--ispswitch script-- ether1 step-3" dst-address=88.204.22.0/24 in-interface-list=LAN
+add action=accept chain=prerouting comment="--ispswitch script-- ether2 step-3" dst-address=78.140.9.0/24 in-interface-list=LANen   
 add action=mark-routing chain=prerouting comment="--ispswitch script-- ether1 step-5" connection-mark=WAN-CON-ether1 in-interface-list=LAN new-routing-mark=WAN-RM-ether1
 add action=mark-routing chain=prerouting comment="--ispswitch script-- ether2 step-5" connection-mark=WAN-CON-ether2 in-interface-list=LAN new-routing-mark=WAN-RM-ether2
-add action=mark-connection chain=pcc comment="--ispswitch script-- PCC-3 step-4" new-connection-mark=WAN-CON-ether1 passthrough=yes per-connection-classifier=both-addresses-and-ports:2/0
-add action=mark-connection chain=pcc comment="--ispswitch script-- PCC-3 step-4" new-connection-mark=WAN-CON-ether2 passthrough=yes per-connection-classifier=both-addresses-and-ports:2/1
+add action=change-mss chain=forward new-mss=1300 out-interface-list=LAN passthrough=yes protocol=tcp tcp-flags=syn
+
+/ip route rule
+add src-address=88.204.22.254/32 table=WAN-RM-ether1
+add src-address=78.140.9.1/32 table=WAN-RM-ether2
+
+/ip route
+add distance=2 gateway=88.204.22.254 routing-mark=WAN-RM-ether1
+add distance=2 gateway=78.140.9.1 routing-mark=WAN-RM-ether2
+add check-gateway=ping distance=1 gateway=88.204.22.254
+add check-gateway=ping distance=2 gateway=78.140.9.1
+
+

@@ -116,6 +116,8 @@ sudo iptables-restore /etc/sysconfig/iptables								#перечитать ко�
 
 sysctl######################################################################
 sudo sysctl net.ipv4.ip_forward=1									#включить роутинг
+sysctl -a                                                           #показать все параметры
+sysctl -p                                                           #перечитать конфиг
 
 sudo tcpdump -i any port 3306
 tcpdump  -i eth0 host 1.1.1.1 -vv -nn

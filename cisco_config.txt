@@ -33,7 +33,7 @@ neighbor 199.1.1.1 allowas-in 1					позволяет маршруту возв
 
 show ip bgp neighbors  80.92.164.2 advertised-routes		анонсируемые маршруты bgp
 show ip bgp neighbors  80.92.164.2 routes						 принимаемые маршруты bgp
-
+clear ip bgp 195.208.208.100 soft out								  обновить исходящую политику не сбрасывая сессию
 
 В команде local-as есть атрибуты no-prepend и replace-as. 
 No-prepend позволят не добавлять в AS-Path номер фиктивной АС — только настоящей. 
@@ -47,3 +47,45 @@ loader > boot nxos.7.0.3.I7.bin
 boot config-file flash:/config.text				указать конфи с которого грузиться
 
 buffer-delete	отчистить буфер свитч профиля
+
+#Включить scp
+feature scp-server		NX
+ip scp server enable	ASR
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+в регионе должны быть одинаковые:
+    region name — название региона. Задается командой name.
+    revision level — параметр изменения конфигурации.
+    multiple spanning-tree instances (MSTI)
+    
+cisco
+
+spanning-tree mst configuration
+name REGION_NAME
+instance INSTANCE_NUM vlan VLANS
+
+spanning-tree mst INSTANCE_NUM root primary
+
+
+mtik
+
+/interface bridge
+add name=REGION_NAME priority=0x1000
+/interface bridge msti add bridge=bridge identifier=INSTANCE_NUM vlan-mapping=VLANS
+
+
+
+bridge priority must be in steps of 4096, the 12 lowest bits are ignored!!!!
+valid bridge priorities: 0, 4096, 8192, 12288, 16384, 20480, 24576, 28672, 32768, 36864, 40960, 45056, 49152, 53248, 57344, 61440
